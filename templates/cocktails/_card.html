@@ -1,0 +1,30 @@
+{% load static %}
+<div class="cocktail-card">
+  <a href="{% url 'cocktail_detail' cocktail.pk %}">
+    {% if cocktail.image %}
+      <img src="{{ cocktail.image.url }}" class="card-img" alt="{{ cocktail.name }}">
+    {% else %}
+      <div class="card-img-placeholder">🍹</div>
+    {% endif %}
+  </a>
+  <div class="card-body-custom">
+    <h5 class="card-title-custom">
+      <a href="{% url 'cocktail_detail' cocktail.pk %}">{{ cocktail.name }}</a>
+    </h5>
+    <div class="card-stars">
+      {% with avg=cocktail.avg_rating %}
+        {% for i in "12345" %}
+          {% if forloop.counter <= avg %}
+            <i class="fas fa-star star-filled"></i>
+          {% elif forloop.counter|add:"-1" < avg %}
+            <i class="fas fa-star-half-stroke star-half"></i>
+          {% else %}
+            <i class="far fa-star star-empty"></i>
+          {% endif %}
+        {% endfor %}
+        <span class="card-rating-num">({{ cocktail.rating_count }})</span>
+      {% endwith %}
+    </div>
+    <a href="{% url 'cocktail_detail' cocktail.pk %}" class="btn-see-details">See Details</a>
+  </div>
+</div>

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browse Cocktails{% endblock %}
+
+{% block content %}
+<div class="browse-layout">
+
+  <!-- Sidebar — wireframe #1: Filters panel with categorised ingredients -->
+  <aside class="browse-sidebar">
+    <form method="GET" action="{% url 'browse' %}" id="filterForm">
+
+      <div class="sidebar-filters-header">Filters</div>
+
+      <!-- Sort options -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Sort by</div>
+        <label class="sidebar-radio"><input type="radio" name="sort" value="newest" {% if sort == 'newest' %}checked{% endif %} onchange="this.form.submit()"> Newest</label>
+        <label class="sidebar-radio"><input type="radio" name="sort" value="rating" {% if sort == 'rating' %}checked{% endif %} onchange="this.form.submit()"> Highest Rated</label>
+        <label class="sidebar-radio"><input type="radio" name="sort" value="popular" {% if sort == 'popular' %}checked{% endif %} onchange="this.form.submit()"> Most Popular</label>
+      </div>
+
+      <!-- Ingredient categories — matches wireframe exactly -->
+      {% for cat_label, cat_ingredients in grouped_ingredients %}
+        <div class="sidebar-section">
+          <div class="sidebar-section-label">{{ cat_label }}</div>
+          <ul class="sidebar-ingredient-list">
+            {% for ing in cat_ingredients %}
+              <li>
+                <label class="sidebar-ing-label">
+                  <input type="checkbox" name="ingredients" value="{{ ing.id }}"
+                         {% if ing.id in selected_ingredients %}checked{% endif %}
+                         class="sidebar-ing-check">
+                  {{ ing.name }}
+                </label>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+
+      <!-- Hidden fields to preserve sort when clicking checkboxes -->
+      {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+      <button type="submit" class="btn-apply-filters">Apply Filters</button>
+      {% if q or selected_ingredients %}
+        <a href="{% url 'browse' %}" class="btn-clear-filters">Clear All</a>
+      {% endif %}
+    </form>
+  </aside>
+
+  <!-- Main content -->
+  <div class="browse-main">
+
+    <!-- Search bar -->
+    <form method="GET" action="{% url 'browse' %}" class="browse-search-bar">
+      <input type="text" name="q" class="browse-search-input"
+             placeholder="Search cocktails by name..." value="{{ q }}">
+      {% for id in selected_ingredients %}
+        <input type="hidden" name="ingredients" value="{{ id }}">
+      {% endfor %}
+      <input type="hidden" name="sort" value="{{ sort }}">
+      <button type="submit" class="btn-search">
+        <i class="fas fa-search"></i> Search
+      </button>
+    </form>
+
+    <!-- Header -->
+    <div class="browse-header">
+      <h1 class="browse-title">Cocktails</h1>
+      <span class="browse-count">{{ cocktails.paginator.count }} recipe{{ cocktails.paginator.count|pluralize }}</span>
+    </div>
+
+    <!-- Active filter tags -->
+    {% if q or selected_ingredients %}
+      <div class="active-filters-bar">
+        {% if q %}
+          <span class="active-filter-chip">
+            "{{ q }}"
+            <a href="?sort={{ sort }}{% for id in selected_ingredients %}&ingredients={{ id }}{% endfor %}" class="chip-remove">×</a>
+          </span>
+        {% endif %}
+        {% for ing in ingredients %}
+          {% if ing.id in selected_ingredients %}
+            <span class="active-filter-chip">
+              {{ ing.name }}
+              <a href="?q={{ q }}&sort={{ sort }}{% for id in selected_ingredients %}{% if id != ing.id %}&ingredients={{ id }}{% endif %}{% endfor %}" class="chip-remove">×</a>
+            </span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Card grid — 3 columns matching wireframe -->
+    {% if cocktails %}
+      <div class="cocktail-grid">
+        {% for cocktail in cocktails %}
+          {% include 'cocktails/_card.html' with cocktail=cocktail %}
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if cocktails.has_other_pages %}
+        <div class="pagination-bar">
+          {% if cocktails.has_previous %}
+            <a class="page-btn" href="?q={{ q }}&sort={{ sort }}{% for id in selected_ingredients %}&ingredients={{ id }}{% endfor %}&page={{ cocktails.previous_page_number }}">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          {% endif %}
+          {% for num in cocktails.paginator.page_range %}
+            {% if cocktails.number == num %}
+              <span class="page-btn page-btn--active">{{ num }}</span>
+            {% elif num > cocktails.number|add:'-3' and num < cocktails.number|add:'3' %}
+              <a class="page-btn" href="?q={{ q }}&sort={{ sort }}{% for id in selected_ingredients %}&ingredients={{ id }}{% endfor %}&page={{ num }}">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+          {% if cocktails.has_next %}
+            <a class="page-btn" href="?q={{ q }}&sort={{ sort }}{% for id in selected_ingredients %}&ingredients={{ id }}{% endfor %}&page={{ cocktails.next_page_number }}">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h4>No cocktails found</h4>
+        <p>Try adjusting your search or filters.</p>
+        <a href="{% url 'browse' %}" class="btn-accent-outline">Clear Filters</a>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
