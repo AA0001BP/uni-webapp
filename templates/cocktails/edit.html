@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit {{ cocktail.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-2">
+  <div class="wf-form-wrap">
+
+    <h2 class="wf-form-title">Edit cocktail</h2>
+    <p class="text-muted mb-4">Editing: <strong>{{ cocktail.name }}</strong></p>
+
+    <form method="POST" enctype="multipart/form-data" id="cocktailForm" novalidate>
+      {% csrf_token %}
+
+      <div class="wf-field-row">
+        <label class="wf-label">Name:</label>
+        <div class="wf-input-wrap">{{ form.name }}</div>
+      </div>
+
+      <div class="wf-field-row">
+        <label class="wf-label">Ingredients:</label>
+        <div class="wf-input-wrap">
+          <div id="ingredientsContainer">
+            {% for ci in existing_ingredients %}
+              <div class="ingredient-row">
+                <div class="ing-row-inner">
+                  <input type="text" name="ingredient_name[]" class="form-control ingredient-name-input"
+                         value="{{ ci.ingredient.name }}" placeholder="Ingredient" autocomplete="off">
+                  <input type="text" name="ingredient_amount[]" class="form-control ing-amount-input"
+                         value="{{ ci.amount }}" placeholder="Amount">
+                  <button type="button" class="remove-ingredient btn-remove-ing">×</button>
+                </div>
+                <div class="autocomplete-dropdown d-none"></div>
+              </div>
+            {% empty %}
+              <div class="ingredient-row">
+                <div class="ing-row-inner">
+                  <input type="text" name="ingredient_name[]" class="form-control ingredient-name-input" placeholder="Ingredient" autocomplete="off">
+                  <input type="text" name="ingredient_amount[]" class="form-control ing-amount-input" placeholder="Amount">
+                  <button type="button" class="remove-ingredient btn-remove-ing">×</button>
+                </div>
+                <div class="autocomplete-dropdown d-none"></div>
+              </div>
+            {% endfor %}
+          </div>
+          <button type="button" id="addIngredient" class="btn-add-ingredient">+ Add another ingredient</button>
+        </div>
+      </div>
+
+      <div class="wf-field-row">
+        <label class="wf-label">Description:</label>
+        <div class="wf-input-wrap">{{ form.description }}</div>
+      </div>
+
+      <div class="wf-field-row wf-field-row--top">
+        <label class="wf-label">Instructions:</label>
+        <div class="wf-input-wrap">
+          <div class="wf-instructions-image-row">
+            <div class="wf-instructions-col">{{ form.instructions }}</div>
+            <div class="wf-image-upload-col">
+              {% if cocktail.image %}
+                <div class="current-img-wrap mb-2">
+                  <img src="{{ cocktail.image.url }}" class="current-img-thumb" alt="Current">
+                  <span class="text-muted small">Current image</span>
+                </div>
+              {% endif %}
+              <label class="wf-image-dropzone" for="id_image">
+                <div id="imagePreviewInner" class="wf-image-dropzone-inner">
+                  <i class="fas fa-image wf-upload-icon"></i>
+                  <span class="wf-upload-label">Upload new image</span>
+                </div>
+                <img id="previewImg" src="" alt="Preview" class="wf-image-preview d-none">
+              </label>
+              {{ form.image }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wf-submit-row">
+        <a href="{% url 'cocktail_detail' cocktail.pk %}" class="btn-wf-cancel">Cancel</a>
+        <button type="submit" class="btn-wf-submit">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  window.INGREDIENT_AUTOCOMPLETE_URL = "{% url 'ingredient_autocomplete' %}";
+  window.IS_EDIT = true;
+</script>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ cocktail.name }}{% endblock %}
+
+{% block content %}
+<div class="detail-page container py-4 mt-2">
+
+  <!-- Breadcrumb -->
+  <nav class="detail-breadcrumb mb-3">
+    <a href="{% url 'home' %}">Home</a>
+    <span class="bc-sep">/</span>
+    <a href="{% url 'browse' %}">Browse cocktails</a>
+    <span class="bc-sep">/</span>
+    <span>{{ cocktail.name }}</span>
+  </nav>
+
+  <div class="detail-grid">
+
+    <!-- LEFT COLUMN: Image → Favourites → Comments (wireframe #2) -->
+    <div class="detail-left">
+
+      <!-- Image -->
+      <div class="detail-img-wrap">
+        {% if cocktail.image %}
+          <img src="{{ cocktail.image.url }}" class="detail-img" alt="{{ cocktail.name }}">
+        {% else %}
+          <div class="detail-img-placeholder">
+            <svg viewBox="0 0 4 3" xmlns="http://www.w3.org/2000/svg" class="placeholder-svg">
+              <rect width="4" height="3" fill="none" stroke="currentColor" stroke-width="0.08"/>
+              <line x1="0" y1="0" x2="4" y2="3" stroke="currentColor" stroke-width="0.08"/>
+              <line x1="4" y1="0" x2="0" y2="3" stroke="currentColor" stroke-width="0.08"/>
+            </svg>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Add to Favourites button -->
+      {% if user.is_authenticated %}
+        <button id="favBtn" class="btn-favourites {% if is_favourite %}btn-favourites--active{% endif %}"
+                data-url="{% url 'toggle_favourite' cocktail.pk %}"
+                data-csrf="{{ csrf_token }}">
+          {% if is_favourite %}
+            <i class="fas fa-heart me-2"></i>Remove from Favourites
+          {% else %}
+            <i class="far fa-heart me-2"></i>Add to Favourites
+          {% endif %}
+        </button>
+      {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn-favourites">
+          <i class="far fa-heart me-2"></i>Add to Favourites
+        </a>
+      {% endif %}
+
+      {% if cocktail.creator == user or user.is_staff %}
+        <div class="detail-edit-actions mt-2">
+          <a href="{% url 'cocktail_edit' cocktail.pk %}" class="btn-edit-small">
+            <i class="fas fa-pen me-1"></i>Edit
+          </a>
+          <button class="btn-delete-small" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="fas fa-trash me-1"></i>Delete
+          </button>
+        </div>
+      {% endif %}
+
+      <!-- Comments section -->
+      <div class="comments-panel mt-4">
+        <h5 class="comments-panel-title">Comments</h5>
+
+        {% if user.is_authenticated %}
+          <form method="POST" action="{% url 'add_comment' cocktail.pk %}" id="commentForm" class="comment-form">
+            {% csrf_token %}
+            <textarea name="text" class="comment-textarea" rows="3" placeholder="Add a comment..."></textarea>
+            <button type="submit" class="btn-post-comment">Post Comment</button>
+          </form>
+        {% else %}
+          <p class="comment-login-prompt">
+            <a href="{% url 'login' %}?next={{ request.path }}">Login</a> to leave a comment.
+          </p>
+        {% endif %}
+
+        <div id="commentsList" class="comments-list">
+          {% for comment in comments %}
+            <div class="comment-item" id="comment-{{ comment.id }}">
+              <div class="comment-meta">
+                <span class="comment-username"><i class="fas fa-user-circle me-1"></i>{{ comment.user.username }}</span>
+                <span class="comment-time">{{ comment.created_at|date:"M d, Y" }}</span>
+                {% if user.is_authenticated and comment.user == user or user.is_staff %}
+                  <button class="btn-delete-comment"
+                          data-url="{% url 'delete_comment' cocktail.pk comment.id %}"
+                          data-csrf="{{ csrf_token }}"
+                          data-comment-id="{{ comment.id }}"
+                          title="Delete">×</button>
+                {% endif %}
+              </div>
+              <p class="comment-body">{{ comment.text }}</p>
+            </div>
+          {% empty %}
+            <p class="no-comments" id="noComments">No comments yet. Be the first!</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Name → Stars → Ingredients → Instructions (wireframe #2) -->
+    <div class="detail-right">
+
+      <h1 class="detail-cocktail-name">{{ cocktail.name }}</h1>
+
+      <!-- Star rating display + interactive picker -->
+      <div class="detail-stars-row">
+        <div class="detail-avg-stars" id="avgStars">
+          {% with avg=cocktail.avg_rating %}
+            {% for i in "12345" %}
+              {% if forloop.counter <= avg %}
+                <i class="fas fa-star star-filled"></i>
+              {% elif forloop.counter|add:"-1" < avg %}
+                <i class="fas fa-star-half-stroke star-half"></i>
+              {% else %}
+                <i class="far fa-star star-empty"></i>
+              {% endif %}
+            {% endfor %}
+          {% endwith %}
+        </div>
+        <span class="detail-avg-num" id="avgRatingNum">{{ cocktail.avg_rating }}</span>
+        <span class="detail-rating-count" id="ratingCountText">({{ cocktail.rating_count }} rating{{ cocktail.rating_count|pluralize }})</span>
+      </div>
+
+      {% if user.is_authenticated %}
+        <div class="detail-rate-row">
+          <span class="rate-label">{% if user_rating %}Your rating:{% else %}Rate this:{% endif %}</span>
+          <div class="star-picker" id="starPicker"
+               data-url="{% url 'rate_cocktail' cocktail.pk %}"
+               data-csrf="{{ csrf_token }}"
+               data-current="{{ user_rating.stars|default:0 }}">
+            {% for i in "12345" %}
+              <button type="button" class="star-btn {% if user_rating and forloop.counter <= user_rating.stars %}star-active{% endif %}"
+                      data-value="{{ forloop.counter }}">
+                <i class="{% if user_rating and forloop.counter <= user_rating.stars %}fas{% else %}far{% endif %} fa-star"></i>
+              </button>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Description -->
+      {% if cocktail.description %}
+        <p class="detail-description">{{ cocktail.description }}</p>
+      {% endif %}
+
+      <!-- Ingredients section -->
+      <div class="detail-section">
+        <h3 class="detail-section-heading">Ingredients</h3>
+        <div class="detail-ingredients-list">
+          {% for ci in cocktail.cocktail_ingredients.all %}
+            <div class="detail-ingredient-row">
+              <span class="detail-ingredient-name">{{ ci.ingredient.name }}</span>
+              <span class="detail-ingredient-amount">{{ ci.amount }}</span>
+            </div>
+          {% empty %}
+            <p class="text-muted">No ingredients listed.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Instructions section -->
+      <div class="detail-section">
+        <h3 class="detail-section-heading">Instructions</h3>
+        <div class="detail-instructions">
+          {{ cocktail.instructions|linebreaks }}
+        </div>
+      </div>
+
+      <!-- Creator info -->
+      <div class="detail-creator-row">
+        <span>By <strong>{{ cocktail.creator.username }}</strong></span>
+        <span>{{ cocktail.created_at|date:"F d, Y" }}</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Related cocktails -->
+  {% if related %}
+    <div class="related-section mt-5">
+      <h4 class="related-title">You might also like</h4>
+      <div class="cocktail-grid cocktail-grid--4">
+        {% for rc in related %}
+          {% include 'cocktails/_card.html' with cocktail=rc %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Delete Modal -->
+{% if cocktail.creator == user or user.is_staff %}
+  <div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content site-modal">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Cocktail</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete <strong>{{ cocktail.name }}</strong>? This cannot be undone.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form method="POST" action="{% url 'cocktail_delete' cocktail.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

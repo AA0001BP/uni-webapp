@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add a Cocktail{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-2">
+  <div class="wf-form-wrap">
+
+    <h2 class="wf-form-title">Add a cocktail</h2>
+
+    <form method="POST" enctype="multipart/form-data" id="cocktailForm" novalidate>
+      {% csrf_token %}
+
+      <!-- Name row — label left, input right -->
+      <div class="wf-field-row">
+        <label class="wf-label">Name:</label>
+        <div class="wf-input-wrap">
+          {{ form.name }}
+          {% if form.name.errors %}<div class="wf-error">{{ form.name.errors|join:", " }}</div>{% endif %}
+        </div>
+      </div>
+
+      <!-- Ingredients row -->
+      <div class="wf-field-row">
+        <label class="wf-label">Ingredients:</label>
+        <div class="wf-input-wrap">
+          <div id="ingredientsContainer">
+            <div class="ingredient-row">
+              <div class="ing-row-inner">
+                <input type="text" name="ingredient_name[]" class="form-control ingredient-name-input"
+                       placeholder="e.g. Rum" autocomplete="off">
+                <input type="text" name="ingredient_amount[]" class="form-control ing-amount-input"
+                       placeholder="Amount e.g. 50ml">
+                <button type="button" class="remove-ingredient btn-remove-ing" title="Remove">×</button>
+              </div>
+              <div class="autocomplete-dropdown d-none"></div>
+            </div>
+          </div>
+          <button type="button" id="addIngredient" class="btn-add-ingredient">
+            + Add another ingredient
+          </button>
+        </div>
+      </div>
+
+      <!-- Description row -->
+      <div class="wf-field-row">
+        <label class="wf-label">Description:</label>
+        <div class="wf-input-wrap">
+          {{ form.description }}
+        </div>
+      </div>
+
+      <!-- Instructions + Upload image side by side — wireframe #4 layout -->
+      <div class="wf-field-row wf-field-row--top">
+        <label class="wf-label">Instructions:</label>
+        <div class="wf-input-wrap">
+          <div class="wf-instructions-image-row">
+            <!-- Instructions textarea -->
+            <div class="wf-instructions-col">
+              {{ form.instructions }}
+              {% if form.instructions.errors %}<div class="wf-error">{{ form.instructions.errors|join:", " }}</div>{% endif %}
+            </div>
+            <!-- Upload image dashed box -->
+            <div class="wf-image-upload-col">
+              <label class="wf-image-dropzone" for="id_image">
+                <div id="imagePreviewInner" class="wf-image-dropzone-inner">
+                  <i class="fas fa-image wf-upload-icon"></i>
+                  <span class="wf-upload-label">Upload image</span>
+                  <span class="wf-upload-hint">Click to browse</span>
+                </div>
+                <img id="previewImg" src="" alt="Preview" class="wf-image-preview d-none">
+              </label>
+              {{ form.image }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit row -->
+      <div class="wf-submit-row">
+        <a href="{% url 'browse' %}" class="btn-wf-cancel">Cancel</a>
+        <button type="submit" class="btn-wf-submit">Submit</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  window.INGREDIENT_AUTOCOMPLETE_URL = "{% url 'ingredient_autocomplete' %}";
+  window.IS_EDIT = false;
+</script>
+{% endblock %}
