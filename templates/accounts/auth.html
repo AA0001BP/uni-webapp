@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if active_tab == 'register' %}Create Account{% else %}Login{% endif %}{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card-wrap">
+
+    <!-- Tab toggle — exactly as wireframe #3: [Login] [Register] -->
+    <div class="auth-tabs">
+      <button class="auth-tab {% if active_tab != 'register' %}auth-tab--active{% endif %}"
+              id="tabLogin" onclick="switchTab('login')">Login</button>
+      <button class="auth-tab {% if active_tab == 'register' %}auth-tab--active{% endif %}"
+              id="tabRegister" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <div class="auth-form-panel" id="loginPanel" {% if active_tab == 'register' %}style="display:none"{% endif %}>
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="login">
+
+        {% if login_error and active_tab != 'register' %}
+          <div class="auth-error">{{ login_error }}</div>
+        {% endif %}
+
+        <div class="auth-field">
+          <label class="auth-label">Username</label>
+          <input type="text" name="username" class="auth-input" placeholder="Enter your username" required autofocus>
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Password</label>
+          <input type="password" name="password" class="auth-input" placeholder="Enter your password" required>
+        </div>
+
+        <label class="auth-remember">
+          <input type="checkbox" name="remember"> Remember me
+        </label>
+
+        <div class="auth-submit-row">
+          <button type="submit" class="btn-auth-submit">Log in</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Register Form -->
+    <div class="auth-form-panel" id="registerPanel" {% if active_tab != 'register' %}style="display:none"{% endif %}>
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="register">
+
+        {% if register_form.non_field_errors %}
+          <div class="auth-error">{{ register_form.non_field_errors|join:", " }}</div>
+        {% endif %}
+
+        <div class="auth-field">
+          <label class="auth-label">Username</label>
+          {{ register_form.username }}
+          {% if register_form.username.errors %}
+            <div class="auth-field-error">{{ register_form.username.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Email</label>
+          {{ register_form.email }}
+          {% if register_form.email.errors %}
+            <div class="auth-field-error">{{ register_form.email.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Password</label>
+          {{ register_form.password1 }}
+          {% if register_form.password1.errors %}
+            <div class="auth-field-error">{{ register_form.password1.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Confirm Password</label>
+          {{ register_form.password2 }}
+          {% if register_form.password2.errors %}
+            <div class="auth-field-error">{{ register_form.password2.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <label class="auth-remember">
+          <input type="checkbox" name="remember"> Remember me
+        </label>
+
+        <div class="auth-submit-row">
+          <button type="submit" class="btn-auth-submit">Create Account</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  const loginPanel    = document.getElementById('loginPanel');
+  const registerPanel = document.getElementById('registerPanel');
+  const tabLogin      = document.getElementById('tabLogin');
+  const tabRegister   = document.getElementById('tabRegister');
+  if (tab === 'login') {
+    loginPanel.style.display    = '';
+    registerPanel.style.display = 'none';
+    tabLogin.classList.add('auth-tab--active');
+    tabRegister.classList.remove('auth-tab--active');
+  } else {
+    loginPanel.style.display    = 'none';
+    registerPanel.style.display = '';
+    tabRegister.classList.add('auth-tab--active');
+    tabLogin.classList.remove('auth-tab--active');
+  }
+}
+</script>
+{% endblock %}
