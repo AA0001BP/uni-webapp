@@ -7,7 +7,6 @@
 <div class="auth-page">
   <div class="auth-card-wrap">
 
-    <!-- Tab toggle — exactly as wireframe #3: [Login] [Register] -->
     <div class="auth-tabs">
       <button class="auth-tab {% if active_tab != 'register' %}auth-tab--active{% endif %}"
               id="tabLogin" onclick="switchTab('login')">Login</button>
@@ -15,7 +14,6 @@
               id="tabRegister" onclick="switchTab('register')">Register</button>
     </div>
 
-    <!-- Login Form -->
     <div class="auth-form-panel" id="loginPanel" {% if active_tab == 'register' %}style="display:none"{% endif %}>
       <form method="POST">
         {% csrf_token %}
@@ -45,7 +43,6 @@
       </form>
     </div>
 
-    <!-- Register Form -->
     <div class="auth-form-panel" id="registerPanel" {% if active_tab != 'register' %}style="display:none"{% endif %}>
       <form method="POST">
         {% csrf_token %}

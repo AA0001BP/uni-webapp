@@ -1,10 +1,3 @@
-"""
-ShakesRemix — Population Script
-Run with: python population_script.py
-
-Fetches cocktail data and images from TheCocktailDB (free API, no key needed).
-Creates sample users, cocktails, ratings and comments.
-"""
 import os
 import sys
 import django
@@ -20,10 +13,8 @@ from cocktails.models import (
     INGREDIENT_CATEGORIES
 )
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
 
 def fetch_cocktail(name):
-    """Fetch cocktail data from TheCocktailDB API."""
     url = f'https://www.thecocktaildb.com/api/json/v1/1/search.php?s={name}'
     try:
         r = requests.get(url, timeout=10)
@@ -36,7 +27,6 @@ def fetch_cocktail(name):
 
 
 def download_image(url, filename):
-    """Download image from URL and return a ContentFile."""
     try:
         r = requests.get(url, timeout=15)
         if r.status_code == 200:
@@ -47,7 +37,6 @@ def download_image(url, filename):
 
 
 def categorise(name):
-    """Simple ingredient categorisation."""
     name_lower = name.lower()
     spirits = ['vodka', 'rum', 'gin', 'tequila', 'whiskey', 'whisky', 'bourbon',
                'brandy', 'triple sec', 'cointreau', 'campari', 'aperol', 'vermouth',
@@ -73,16 +62,13 @@ def categorise(name):
     return 'other'
 
 
-# ── Users ─────────────────────────────────────────────────────────────────────
 
 print('Creating users...')
 
-# Admin superuser
 if not User.objects.filter(username='admin').exists():
     User.objects.create_superuser('admin', 'admin@shakesremix.com', 'admin123')
     print('  Created superuser: admin / admin123')
 
-# Regular users
 sample_users = [
     ('sophia', 'sophia@example.com', 'Password123'),
     ('marco',  'marco@example.com',  'Password123'),
@@ -101,9 +87,7 @@ for uname, email, pwd in sample_users:
     UserProfile.objects.get_or_create(user=user)
     users[uname] = user
 
-# ── Cocktails (from TheCocktailDB) ────────────────────────────────────────────
 
-# Cocktail names to fetch, paired with who creates them
 cocktails_to_fetch = [
     ('Mojito',          'sophia'),
     ('Margarita',       'marco'),
@@ -130,7 +114,6 @@ for cocktail_name, creator_name in cocktails_to_fetch:
 
     creator = users.get(creator_name, users['sophia'])
 
-    # Build a description from the category and glass type
     category  = drink.get('strCategory', '')
     glass     = drink.get('strGlass', '')
     desc_parts = [p for p in [category, glass] if p]
@@ -143,7 +126,6 @@ for cocktail_name, creator_name in cocktails_to_fetch:
         creator=creator,
     )
 
-    # Download and attach image
     thumb_url = drink.get('strDrinkThumb')
     if thumb_url:
         img_content, filename = download_image(
@@ -156,7 +138,6 @@ for cocktail_name, creator_name in cocktails_to_fetch:
 
     cocktail.save()
 
-    # Add ingredients
     for i in range(1, 16):
         ing_name = drink.get(f'strIngredient{i}')
         measure  = drink.get(f'strMeasure{i}') or ''
@@ -183,7 +164,6 @@ for cocktail_name, creator_name in cocktails_to_fetch:
     print(f'  Created: {cocktail.name}')
 
 
-# ── Ratings ───────────────────────────────────────────────────────────────────
 
 print('\nAdding ratings...')
 
@@ -199,7 +179,6 @@ for idx, cocktail in enumerate(all_cocktails):
             defaults={'stars': min(stars, 5)}
         )
 
-# ── Comments ──────────────────────────────────────────────────────────────────
 
 print('Adding comments...')
 
@@ -218,7 +197,6 @@ for idx, cocktail in enumerate(all_cocktails[:5]):
         defaults={'text': comments_text[idx % len(comments_text)]}
     )
 
-# ── Done ──────────────────────────────────────────────────────────────────────
 
 print('\nPopulation complete!')
 print('-------------------------------')

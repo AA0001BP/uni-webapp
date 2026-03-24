@@ -1,6 +1,3 @@
-/* ============================================================
-   ShakesRemix — Main JavaScript
-   ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -64,6 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+
+
+     
     function renderAvgStars(container, avg) {
       container.innerHTML = '';
       for (let i = 1; i <= 5; i++) {
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Favourite Toggle ─────────────────────────────────────────
+
   const favBtn = document.getElementById('favBtn');
   if (favBtn) {
     favBtn.addEventListener('click', async () => {
@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── AJAX Comment Submission ───────────────────────────────────
   const commentForm = document.getElementById('commentForm');
   if (commentForm) {
     commentForm.addEventListener('submit', async (e) => {
@@ -145,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
     list.insertBefore(div, list.firstChild);
   }
 
-  // ── AJAX Delete Comment ───────────────────────────────────────
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-delete-comment');
     if (!btn) return;
@@ -165,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ── Ingredient Rows (Create / Edit) ───────────────────────────
+   
   const ingredientsContainer = document.getElementById('ingredientsContainer');
   const addIngredientBtn     = document.getElementById('addIngredient');
 
@@ -201,7 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
       row.querySelector('.ingredient-name-input').focus();
     }
 
-    // Attach listeners to existing rows
     document.querySelectorAll('.ingredient-row').forEach(attachIngredientListeners);
 
     function attachIngredientListeners(row) {
@@ -252,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Image Preview ─────────────────────────────────────────────
   const imageInput = document.querySelector('input[type="file"][accept="image/*"]');
   const previewBox = document.getElementById('imagePreview');
   const previewImg = document.getElementById('previewImg');
@@ -272,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Password Toggle ───────────────────────────────────────────
+   
   document.querySelectorAll('.toggle-password').forEach(btn => {
     btn.addEventListener('click', () => {
       const input = btn.closest('.input-group').querySelector('input');
@@ -283,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Toast Helper ──────────────────────────────────────────────
   function showToast(message, type = 'info') {
     const container = document.querySelector('.toast-container')
       || createToastContainer();
@@ -325,7 +320,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return div.innerHTML;
   }
 
-  // ── Mobile navbar toggle ─────────────────────────────────────
   const mobileToggle = document.getElementById('mobileToggle');
   const mobileMenu   = document.getElementById('mobileMenu');
   if (mobileToggle && mobileMenu) {
@@ -334,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Smooth scroll for anchor links ───────────────────────────
   document.querySelectorAll('a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
       const target = document.querySelector(link.getAttribute('href'));

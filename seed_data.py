@@ -1,7 +1,4 @@
-"""
-Run with: python seed_data.py
-Seeds the database with sample cocktails, ingredients, and ratings.
-"""
+
 import os
 import django
 

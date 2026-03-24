@@ -6,13 +6,11 @@
 {% block content %}
 <div class="browse-layout">
 
-  <!-- Sidebar — wireframe #1: Filters panel with categorised ingredients -->
   <aside class="browse-sidebar">
     <form method="GET" action="{% url 'browse' %}" id="filterForm">
 
       <div class="sidebar-filters-header">Filters</div>
 
-      <!-- Sort options -->
       <div class="sidebar-section">
         <div class="sidebar-section-label">Sort by</div>
         <label class="sidebar-radio"><input type="radio" name="sort" value="newest" {% if sort == 'newest' %}checked{% endif %} onchange="this.form.submit()"> Newest</label>
@@ -20,7 +18,6 @@
         <label class="sidebar-radio"><input type="radio" name="sort" value="popular" {% if sort == 'popular' %}checked{% endif %} onchange="this.form.submit()"> Most Popular</label>
       </div>
 
-      <!-- Ingredient categories — matches wireframe exactly -->
       {% for cat_label, cat_ingredients in grouped_ingredients %}
         <div class="sidebar-section">
           <div class="sidebar-section-label">{{ cat_label }}</div>
@@ -39,7 +36,6 @@
         </div>
       {% endfor %}
 
-      <!-- Hidden fields to preserve sort when clicking checkboxes -->
       {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
       <button type="submit" class="btn-apply-filters">Apply Filters</button>
       {% if q or selected_ingredients %}
@@ -48,10 +44,8 @@
     </form>
   </aside>
 
-  <!-- Main content -->
   <div class="browse-main">
 
-    <!-- Search bar -->
     <form method="GET" action="{% url 'browse' %}" class="browse-search-bar">
       <input type="text" name="q" class="browse-search-input"
              placeholder="Search cocktails by name..." value="{{ q }}">
@@ -64,13 +58,11 @@
       </button>
     </form>
 
-    <!-- Header -->
     <div class="browse-header">
       <h1 class="browse-title">Cocktails</h1>
       <span class="browse-count">{{ cocktails.paginator.count }} recipe{{ cocktails.paginator.count|pluralize }}</span>
     </div>
 
-    <!-- Active filter tags -->
     {% if q or selected_ingredients %}
       <div class="active-filters-bar">
         {% if q %}
@@ -90,7 +82,6 @@
       </div>
     {% endif %}
 
-    <!-- Card grid — 3 columns matching wireframe -->
     {% if cocktails %}
       <div class="cocktail-grid">
         {% for cocktail in cocktails %}
@@ -98,7 +89,6 @@
         {% endfor %}
       </div>
 
-      <!-- Pagination -->
       {% if cocktails.has_other_pages %}
         <div class="pagination-bar">
           {% if cocktails.has_previous %}

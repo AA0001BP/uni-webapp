@@ -12,7 +12,6 @@
 </head>
 <body>
 
-  <!-- Navbar — plain Bootstrap navbar, matches wireframe -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
     <div class="container">
 
@@ -25,7 +24,6 @@
 
       <div class="collapse navbar-collapse" id="navbarMain">
 
-        <!-- Left links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <a class="nav-link" href="{% url 'home' %}">Home</a>
@@ -40,7 +38,6 @@
           {% endif %}
         </ul>
 
-        <!-- Search on the right, matching wireframe -->
         <form class="d-flex me-2" method="GET" action="{% url 'browse' %}">
           <input class="form-control form-control-sm me-1" type="search" name="q"
                  placeholder="Search for a..." value="{{ request.GET.q|default:'' }}" style="width: 180px;">
@@ -87,7 +84,6 @@
     </div>
   </nav>
 
-  <!-- Flash messages -->
   {% if messages %}
     <div class="container mt-2" style="margin-top: calc(56px + 0.5rem) !important;">
       {% for message in messages %}
